@@ -6,8 +6,8 @@ import { useAuthStore } from "@/store/authStore";
 export default function fetchData(path, data, method = "POST") {
 
   const authStore = useAuthStore()
-  
-  const url = `http://localhost:8000/api/${path}`;
+  // todo: put url in env
+  const url = `http://0.0.0.0:8080/api/${path}`;
 
   const headers = new Headers()
   headers.append("Content-Type", "application/json");
