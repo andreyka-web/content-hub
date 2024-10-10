@@ -1,32 +1,38 @@
 version: '3'
 
 services:
-  nginx:
+  hub-api:
     build:
       context: .
       dockerfile: hub-api/Dockerfile
-    volumes:
-      - ./hub-api:/var/www/html
-    image: nginx:alpine
-    depends_on:
-      - php
+    container_name: hub-api
+    # volumes:  
+    #   - ./hub-api:/var/www/html 
     ports:
       - '8080:80'
     networks:
       - internal
     
-  php: 
-    image: php:8.3-fpm-alpine
-    volumes:
-      - ./hub-api:/var/www/html 
+  mysql:
+    image: mysql:8.0.1
+    container_name: hub-db
+    restart: unless-stopped
+    tty: true
+    environment:
+      - MYSQL_USER=laravel
+      - MYSQL_PASSWORD=secret
+      - MYSQL_ROOT_PASSWORD=secret  
+    ports:
+      - 3306:3306
     networks:
       - internal
-
+ 
   node:
     build:
       context: ./hub-fe 
-    volumes:
-      - ./hub-fe/src:/app/src
+    container_name: hub-fe
+    # volumes:
+    #   - ./hub-fe/src:/app/src
     ports: 
       - '8000:3001'
     networks:

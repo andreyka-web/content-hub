@@ -4,7 +4,7 @@ FROM node:18
 RUN npm install -g http-server
 
 # make the 'app' folder the current working directory
-RUN mkdir /app
+RUN mkdir /app && chown www-data:www-data /app
 
 WORKDIR /app
 
@@ -15,9 +15,9 @@ COPY package*.json /app
 RUN npm install
 
 # copy files and folders to the current working directory (i.e. 'app' folder)
-COPY . .
+COPY --chown=www-data:www-data . .
 
 # build app for production with minification 
 RUN npm run build   
-
+# CMD ["npm", "run", "dev"]
 CMD [ "http-server", "dist", "-p", "3001" ]
