@@ -70,15 +70,16 @@ export default {
       }
 
 
-      fetchData('register', data, "POST").then(json => {
-        if(json.hasOwnProperty('errors')) {  
-          this.errors = json.message;
+      fetchData('register', data, "POST")
+      .then(json => {
+        console.log(json)
+
+        if(json.hasOwnProperty('errors')) {   
+          this.errors = json.message; 
         } else { 
           this.router.push('/');
         } 
       })
-
-
      
     }
   }

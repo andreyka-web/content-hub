@@ -1,38 +1,35 @@
 <script setup>
-import fetchData from '@/lib/fetchApi'
+import fetchData, { fetchFile } from '@/lib/fetchApi'
 import Button from './ui/Button.vue';
-import Modal from './ui/Modal.vue'
-import Input from './ui/Input.vue';
-import Label from './ui/Label.vue'
+import Modal from './ui/Modal.vue' 
+
+import { ref } from 'vue';
+import CategoryFrom from '@/components/forms/CategoryFrom.vue';
+import FileUploadForm from './forms/FileUploadForm.vue';
+import FileIcon from './icons/fileIcon.vue';
+import FolderIcon from './icons/folderIcon.vue';
+import FileEditForm from './forms/FileEditForm.vue';
+import CategoryEditFrom from './forms/CategoryEditFrom.vue';
 </script>
 
 <template>
   <h3 class="text-white py-3 text-2xl">My Files</h3>
 
   <div class="bg-white dark:bg-gray-800 relative shadow-md sm:rounded-lg overflow-hidden">
-    <div class="flex flex-col md:flex-row items-center justify-between space-y-3 md:space-y-0 md:space-x-4 p-4">
-      <div class="w-full md:w-1/2 text-left dark:text-white">
-        <p>/{{ currentTree.join('/') }}</p>
-      </div>
-      <div
-        class="w-full md:w-auto flex flex-col md:flex-row space-y-2 md:space-y-0 items-stretch md:items-center justify-end md:space-x-3 flex-shrink-0">
-        <button type="button"
-          class="flex items-center justify-center text-white bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-primary-600 dark:hover:bg-primary-700 focus:outline-none dark:focus:ring-primary-800">
-          upload file
-        </button>
-
-        <button type="button" @click="openCategoryForm()"
-          class="flex items-center justify-center text-white bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-primary-600 dark:hover:bg-primary-700 focus:outline-none dark:focus:ring-primary-800">
-          new folder
-        </button>
-
+    <div class="flex flex-row items-center justify-between space-y-3 md:space-y-0 md:space-x-4 p-4">
+      
+      <div class="flex flex-row justify-end whitespace-nowrap space-x-2">
+        <Button type="button" @click="openModal('file')">Upload File</Button>
+        <Button type="button" @click="openModal('folder')">New Folder</button>
       </div>
     </div>
     <div class="overflow-x-auto">
       <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-        <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+        <thead class="text-xs text-gray-700 bg-gray-200 dark:bg-gray-700 dark:text-gray-400">
           <tr>
-            <th scope="col" class="px-4 py-3">Path</th>
+            <th scope="col" class="px-4 py-3">
+              <p>/{{ currentTree.join('/') }}</p>
+            </th>
             <th scope="col" class="px-4 py-3">
               <span class="sr-only">Actions</span>
             </th>
@@ -40,71 +37,45 @@ import Label from './ui/Label.vue'
         </thead>
         <tbody>
 
-          <tr class="border-b dark:border-gray-700" v-if="parentFolder.length > 0" @click="levelUp">
+          <tr class="border-b dark:border-gray-700 hover:bg-gray-100 cursor-pointer" v-if="parentFolder.length > 0" @click="levelUp">
             <th scope="row"
-              class="px-4 py-3 font-medium text-gray-900 whitespace-nowrap dark:text-white cursor-pointer hover:opacity-50"
+              class="px-4 py-3 font-medium text-gray-900 whitespace-nowrap dark:text-white"
               colspan="2">
-              <span>..</span>
+              <span class="text-xl  ">..</span>
             </th>
           </tr>
 
-          <tr class="border-b dark:border-gray-700" v-for="folder in categories">
-            <th scope="row"
-              class="px-4 py-3 font-medium text-gray-900 whitespace-nowrap dark:text-white cursor-pointer hover:opacity-50"
+          <tr class="border-b dark:border-gray-700 hover:bg-gray-100" v-for="folder in categories">
+            <th scope="row" class="w-full px-4 py-2 font-medium text-gray-900 whitespace-nowrap dark:text-white cursor-pointer "
               @click="setCurrentPath(folder.id)">
+              <FolderIcon class="float-left pe-2  "/>
               <span class="p-2">{{ folder.name }}/</span>
             </th>
-            <td class="px-4 py-3 flex items-end justify-end">
-              <Button type="button">Edit</Button>
-              <Button type="button">Delete</Button>
+            <td class="px-2 py-2 flex items-end justify-end space-x-2">
+              <Button type="button" @click="openFolderEditForm(folder)">Edit</Button>
+              <Button type="button" @click="deleteItem('catgory/'+folder.id)">Delete</Button>
             </td>
           </tr>
 
-          <tr class="border-b dark:border-gray-700">
-            <th scope="row" class="px-4 py-3 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-              <span class="p-2">Filename</span>
+          <tr class="border-b dark:border-gray-700 hover:bg-gray-100" v-for="file in files">
+            <th scope="row" class="w-full px-4 py-2 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+              <FileIcon class="float-left pe-2 "/>
+              <a class="p-2 text-blue-700" @click="fileShow(file.id)">{{ file.filename }}</a>
             </th>
-            <td class="px-4 py-3 flex items-center justify-end">
-              <button id="apple-imac-20-dropdown-button" data-dropdown-toggle="apple-imac-20-dropdown"
-                class="inline-flex items-center p-0.5 text-sm font-medium text-center text-gray-500 hover:text-gray-800 rounded-lg focus:outline-none dark:text-gray-400 dark:hover:text-gray-100"
-                type="button">
-                <svg class="w-5 h-5" aria-hidden="true" fill="currentColor" viewbox="0 0 20 20"
-                  xmlns="http://www.w3.org/2000/svg">
-                  <path
-                    d="M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM16 12a2 2 0 100-4 2 2 0 000 4z" />
-                </svg>
-              </button>
-              <div id="apple-imac-20-dropdown"
-                class="hidden z-10 w-44 bg-white rounded divide-y divide-gray-100 shadow dark:bg-gray-700 dark:divide-gray-600">
-                <ul class="py-1 text-sm text-gray-700 dark:text-gray-200"
-                  aria-labelledby="apple-imac-20-dropdown-button">
-                  <li>
-                    <a href="#"
-                      class="block py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Show</a>
-                  </li>
-                  <li>
-                    <a href="#"
-                      class="block py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Edit</a>
-                  </li>
-                </ul>
-                <div class="py-1">
-                  <a href="#"
-                    class="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">Delete</a>
-                </div>
-              </div>
+            <td class="px-2 py-2 flex items-end justify-end space-x-2">
+              <Button type="button" @click="openFileEditForm(file)">Edit</Button>
+              <Button type="button" @click="deleteItem(`file/${file.id}`)">Delete</Button>
             </td>
           </tr>
-
         </tbody>
       </table>
     </div>
 
-    <Modal isOpen="{{ newCategoryForm }}" title="Create Folder">
-      <form class="space-y-4">
-        <Label for="folder">Folder Name</Label>
-        <Input name="folder" id="folder"/>
-        <Button>save</Button>
-      </form>
+    <Modal :isOpen="isModalOpen" @modal-close="closeModal" v-bind:formId="activeForm">
+      <CategoryFrom v-if="activeForm == 'folder'" @category-saved="itemCreated" :parentFolderId />
+      <CategoryEditFrom v-if="activeForm == 'folderEdit'" @category-saved="itemCreated" :activeFolder />
+      <FileUploadForm v-if="activeForm == 'file'" @file-saved="itemCreated" :parentFolderId />
+      <FileEditForm v-if="activeForm == 'editFile'" @file-saved="itemCreated" :activeFile />
     </Modal>
   </div>
 
@@ -120,7 +91,14 @@ export default {
       files: null,
       currentTree: [],
       parentFolder: [],
-      newCategoryForm: false
+      parentFolderId: null,
+      isModalOpen: ref(false),
+      activeForm: null, 
+      activeFile: null,
+      activeFolder: null,
+      closeModal: () => {
+        this.isModalOpen = false;
+      }
     }
   },
   methods: {
@@ -140,6 +118,9 @@ export default {
     },
     // get current folder content
     readFolder(id = null) {
+      this.categories = null;
+      this.files = null;
+
       const url = id == null ? 'read' : `read/${id}`;
 
       fetchData(url, {}, "GET").then(json => {
@@ -150,19 +131,46 @@ export default {
           this.files = Object.values(json.files)
         }
       })
-    }, 
-    //
-    openCategoryForm(){
-      this.newCategoryForm = true;
     },
-    createFolder() {
-      fetchData('category', { name: "New", parent_id: this.parentFolder.slice(-1)[0] }, "POST").then(json => {
-
+    itemCreated() {
+      this.closeModal();
+      this.readFolder(this.parentFolderId); 
+    },
+    openModal(form) {
+      console.log(form)
+      this.activeForm = form;
+      this.isModalOpen = true;
+      this.parentFolderId =  this.parentFolder.slice(-1)[0]
+    }, 
+    deleteItem(path) { 
+      fetchData(path, {}, "DELETE").then(json => { 
+        this.readFolder(this.parentFolderId)
       });
+    },
+    openFileEditForm(file) { 
+      this.activeFile = file; 
+      this.openModal('editFile');
+    },
+    openFolderEditForm(folder) {
+      this.activeFolder = folder; 
+      this.openModal('folderEdit');
+    },
+    fileShow(id) {
+      const filePreviewWindow = window.open('about:blank');
+      try {
+        const url = fetchFile(`file/${id}`);
+        filePreviewWindow.location.href = url;
+        filePreviewWindow.focus();
+      } catch(e) {
+        filePreviewWindow.close();
+        console.log(e)
+      }
+      
     }
   },
-  created() {
+  created() { 
     this.readFolder();
   }
+
 }
 </script>

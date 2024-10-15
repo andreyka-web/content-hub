@@ -15,6 +15,10 @@ RUN apk add --no-cache \
     nginx \
     supervisor
 
+RUN apk add icu-dev
+RUN docker-php-ext-install pdo pdo_mysql
+RUN docker-php-ext-configure intl && docker-php-ext-install intl
+
 ENV COMPOSER_HOME=/composer
 ENV PATH=$PATH:${COMPOSER_HOME}/bin
 

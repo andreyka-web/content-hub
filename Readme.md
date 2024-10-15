@@ -27,4 +27,9 @@ Laravel API will be running at http://localhost:8080/
 
 
 
-### Troublesooting
+### post install
+In hub-api container we need to clear laravel config and migrate db tables.
+
+```sh
+docker exec -it hub-api sh -c "php artisan config:clear && php artisan migrate"
+```
