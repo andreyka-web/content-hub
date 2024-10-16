@@ -1,8 +1,5 @@
 <script setup>
-import TheWelcome from './components/TheWelcome.vue'
-import Navbar from './components/Navbar.vue';
-import LoginForm from './components/LoginForm.vue';
-import SignupForm from './components/SignupForm.vue';
+import Navbar from './components/Navbar.vue'; 
 import { RouterView } from 'vue-router';
 import { useAuthStore } from './store/authStore'; 
 import { onMounted } from 'vue';

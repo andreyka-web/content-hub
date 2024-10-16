@@ -61,16 +61,14 @@ export default {
         password: this.password,
       }
       
-      fetchData('login', data, "POST").then(json => {
-        if(json.hasOwnProperty('errors')) {  
+      fetchData('login', data, "POST").then(json => { 
+        if(json.hasOwnProperty('message')) {  
           this.errors = json.message;
         } else {
           this.authStore.login(json.token, json.user.name)  
           this.router.push('/');
         } 
       })
- 
-
       
     }
   }

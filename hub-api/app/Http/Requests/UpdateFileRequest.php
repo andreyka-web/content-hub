@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Gate;
 
 class UpdateFileRequest extends FormRequest
 {
@@ -11,8 +12,7 @@ class UpdateFileRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        // TODO: check if owner
-        return false;
+        return Gate::allows('update', $this->file);
     }
 
     /**
@@ -23,7 +23,9 @@ class UpdateFileRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'file' => 'nullable|file|mimes:pdf,txt,docx,ppt,xls|max:2048',
+            'category' => 'nullable|integer',
+            'filename' => 'nullable|string|max:255',
         ];
     }
 }

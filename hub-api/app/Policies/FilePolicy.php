@@ -13,7 +13,7 @@ class FilePolicy
      */
     public function viewAny(User $user): bool
     {
-        //
+        return false;
     }
 
     /**
@@ -21,7 +21,7 @@ class FilePolicy
      */
     public function view(User $user, File $file): bool
     {
-        //
+        return $user->id === $file->user_id;
     }
 
     /**
@@ -29,7 +29,7 @@ class FilePolicy
      */
     public function create(User $user): bool
     {
-        //
+        return $user->id; 
     }
 
     /**
@@ -37,7 +37,7 @@ class FilePolicy
      */
     public function update(User $user, File $file): bool
     {
-        //
+        return $user->id === $file->user_id;
     }
 
     /**
@@ -45,7 +45,7 @@ class FilePolicy
      */
     public function delete(User $user, File $file): bool
     {
-        //
+        return $user->id === $file->user_id;
     }
 
     /**
@@ -53,7 +53,7 @@ class FilePolicy
      */
     public function restore(User $user, File $file): bool
     {
-        //
+        return false;
     }
 
     /**
@@ -61,6 +61,6 @@ class FilePolicy
      */
     public function forceDelete(User $user, File $file): bool
     {
-        //
-    }
+        return false;
+    } 
 }
