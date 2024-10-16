@@ -15,8 +15,10 @@ export default function fetchData(path, data = null, method = "POST", formData =
 }
 
 // return object url 
-export function fetchFile(path) {
-  return fetch(`${api_url}${path}`)
+export async function fetchFile(path) {
+  return await fetch(`${api_url}${path}`, {
+    headers: getHeaders()
+  })
     .then(res => res.blob())
     .then(blob => URL.createObjectURL(blob))
     .catch(console.log);

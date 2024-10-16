@@ -53,7 +53,7 @@ import CategoryEditFrom from './forms/CategoryEditFrom.vue';
             </th>
             <td class="px-2 py-2 flex items-end justify-end space-x-2">
               <Button type="button" @click="openFolderEditForm(folder)">Edit</Button>
-              <Button type="button" @click="deleteItem('catgory/'+folder.id)">Delete</Button>
+              <Button type="button" @click="deleteItem('category/'+folder.id)">Delete</Button>
             </td>
           </tr>
 
@@ -155,17 +155,16 @@ export default {
       this.activeFolder = folder; 
       this.openModal('folderEdit');
     },
-    fileShow(id) {
+    async fileShow(id) {
       const filePreviewWindow = window.open('about:blank');
       try {
-        const url = fetchFile(`file/${id}`);
+        const url = await fetchFile(`file/${id}`);
         filePreviewWindow.location.href = url;
         filePreviewWindow.focus();
       } catch(e) {
         filePreviewWindow.close();
         console.log(e)
       }
-      
     }
   },
   created() { 
