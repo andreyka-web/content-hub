@@ -13,6 +13,12 @@ RUN apk add --no-cache \
     libwebp \
     libzip \
     nginx \
+    php-session \
+    php-fileinfo \
+    php-tokenizer \
+    php-xml \
+    php-dom \
+    php-xmlwriter \
     supervisor
 
 RUN apk add icu-dev
@@ -26,8 +32,12 @@ RUN mkdir -p ${COMPOSER_HOME}
 
 # copy app files with and change owner:group
 COPY --chown=www-data:www-data ./hub-api /var/www/html
+COPY --chown=www-data:www-data ./hub-api/.env.example /var/www/html/.env
 
 WORKDIR /var/www/html 
+
+RUN composer install
+RUN php artisan config:clear
 
 EXPOSE 9000
 
