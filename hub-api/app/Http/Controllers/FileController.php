@@ -113,9 +113,9 @@ class FileController extends Controller
     public function destroy(File $file)
     {
         $user = Auth::user();
-        Gate::authorize('delete', [$user, $file]);
+        Gate::authorize('delete', $file);
 
-        $user->files->where('id', $file->id)->delete();
+        $user->files->firstWhere('id', $file->id)->delete();
 
         if (Storage::exists($file->path)) {
             Storage::delete($file->path);

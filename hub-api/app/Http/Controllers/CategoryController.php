@@ -7,6 +7,7 @@ use App\Http\Requests\UpdateCategoryRequest;
 use App\Models\Category;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Storage;
 
 class CategoryController extends Controller
 {
@@ -63,7 +64,29 @@ class CategoryController extends Controller
     {
         Gate::authorize('delete', $category);
 
-        $category->delete();
+        $this->purgeCategory($category); 
+        
         return ['message' => 'The category was deleted'];
+    }
+    
+    // recursively delete category and all files it contains
+    private function purgeCategory($category) {
+        $user = Auth::user(); 
+        // delete all files in the category
+        $files = $user->files->where('category_id', $category->id);
+        foreach($files as $file){
+            $file->delete();
+            if (Storage::exists($file->path)) {
+                Storage::delete($file->path);
+            }
+        }
+
+        $category->delete();
+
+        // get child categories 
+        $categories = $user->categories->where('parent_id', $category->id);
+        foreach($categories as $category){
+            $this->purgeCategory($category);
+        }
     }
 }
