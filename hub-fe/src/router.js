@@ -4,13 +4,21 @@ import TheWelcome from './components/TheWelcome.vue'
 import LoginForm from './components/forms/LoginForm.vue'
 import SignupForm from './components/forms/SignupForm.vue' 
 import Files from './components/Files.vue'
+import { isAuthenticated } from './lib/auth'
 
-export default new createRouter({
+const router = new createRouter({
   history: createMemoryHistory(),
   routes: [
-    { path: '/', component: TheWelcome },
-    { path: '/login', component: LoginForm },
-    { path: '/signup', component: SignupForm }, 
-    { path: '/files', component: Files }
+    { path: '/', component: TheWelcome, name: 'welcome' },
+    { path: '/login', component: LoginForm, name: 'login' },
+    { path: '/signup', component: SignupForm, name: 'signup' }, 
+    { path: '/files', component: Files, name: 'files' }
   ]
-})
+});
+
+router.beforeEach((to, from, next) => {
+  if(to.name !== 'login' && to.name !== 'signup' && !isAuthenticated()) next({ name: 'login' }); 
+  else next();
+});
+
+export default router;
