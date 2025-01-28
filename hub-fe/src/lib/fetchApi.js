@@ -10,8 +10,22 @@ export default function fetchData(path, data = null, method = "POST", formData =
     headers: getHeaders(formData ? null : "application/json"),
     body: !(["GET", "DELETE"].includes(method)) ? JSON.stringify(data) : null,
   })
-  .then(res => res.json()) 
-  .catch(console.error)
+  .then(res => {
+    console.log(res);
+    if (!res.ok) {
+      throw new Error(res.statusText)
+    }
+    const contentType = res.headers.get("content-type");
+    if(contentType && contentType.includes("application/json")) {
+      return res.json()
+    } else {
+      throw new Error("Response is not in JSON format")
+    }
+  }) 
+  .catch((error) => { 
+    console.error('Fetch API Error:', error); 
+    throw error;
+  });
 }
 
 // return object url 
