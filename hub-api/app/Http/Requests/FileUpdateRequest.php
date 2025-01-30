@@ -1,18 +1,25 @@
 <?php
 
 namespace App\Http\Requests;
-
+ 
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Gate;
 
-class UpdateFileRequest extends FormRequest
+class FileUpdateRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
-    {
-        return Gate::allows('update', $this->file);
+    { 
+        $response =  Gate::inspect('update', $this->file);
+
+        if ($response->allowed()) {
+            return true;
+        } else {
+            throw new AuthorizationException($response->message());
+        }
     }
 
     /**
@@ -22,10 +29,9 @@ class UpdateFileRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
-            'file' => 'nullable|file|mimes:pdf,txt,docx,ppt,xls|max:2048',
+        return [ 
             'category' => 'nullable|integer',
-            'filename' => 'nullable|string|max:255',
+            'name' => 'string|max:255',
         ];
-    }
+    } 
 }

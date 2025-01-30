@@ -19,6 +19,7 @@ RUN apk add --no-cache \
     php-xml \
     php-dom \
     php-xmlwriter \
+    php-pear \ 
     supervisor
 
 RUN apk add icu-dev
@@ -37,15 +38,14 @@ COPY --chown=www-data:www-data ./hub-api/.env.example /var/www/html/.env
 WORKDIR /var/www/html 
 
 RUN composer install
-RUN php artisan config:clear
-
+RUN php artisan config:clear 
 EXPOSE 9000
 
-#  Nginx configuration file
+# dev only
+# VOLUME /var/www/html/vendor
+
+# Nginx configuration file
 COPY ./hub-api/.docker/nginx/default.conf /etc/nginx/http.d/default.conf
 
 # the supervisor configuration file
-COPY ./hub-api/.docker/supervisord.conf /etc/supervisord.conf
-
-# Run both Nginx and PHP-FPM using Supervisor
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]
+COPY --chown=www-data:www-data ./hub-api/.docker/supervisord.conf /etc/supervisord.conf  

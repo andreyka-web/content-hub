@@ -169,7 +169,7 @@ onMounted(() => {
       <CategoryEditFrom v-if="getActiveForm() == 'folderEdit'" @category-saved="itemCreated" :activeFolder />
       <FileUploadForm v-if="getActiveForm() == 'file'" @file-saved="itemCreated" :parentFolderId />
       <FileEditForm v-if="getActiveForm() == 'editFile'" @file-saved="itemCreated" :activeFile />
-      <DeleteConfirmation v-if="getActiveForm() == 'deleteFolder'" @delete-confirmed="deleteItem" @modal-close="closeModal"/>
+      <DeleteConfirmation v-if="Array.from(['deleteFolder','deleteFile']).includes(getActiveForm())" @delete-confirmed="deleteItem" @modal-close="closeModal"/>
     </Modal>
   </div>
 </template>
