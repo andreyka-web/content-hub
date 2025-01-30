@@ -1,39 +1,54 @@
-version: '3'
-
 services:
-  hub-api:
-    build:
-      context: .
-      dockerfile: hub-api/Dockerfile
-    container_name: hub-api
-    # volumes:  
-    #   - ./hub-api:/var/www/html 
-    depends_on:
-      - mysql
-    ports:
-      - '8080:80'
-    networks:
-      - internal
-    
-  mysql:
-    image: mysql:8.0.1
+  hub-db:
+    image: mysql:latest
     container_name: hub-db
     restart: unless-stopped
     tty: true
+    env_file:
+      - ./hub-api/.env
     environment:
-      MYSQL_USER: laravel
-      MYSQL_DATABASE: laravel 
-      MYSQL_PASSWORD: secret
-      MYSQL_ROOT_PASSWORD: secret  
+      MYSQL_USER: $MYSQL_USER
+      MYSQL_DATABASE: $MYSQL_DATABASE
+      MYSQL_PASSWORD: $MYSQL_PASSWORD
+      MYSQL_ROOT_PASSWORD: $MYSQL_ROOT_PASSWORD
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -u ${MYSQL_USER} -p${MYSQL_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
     ports:
       - 3306:3306
     networks:
       - internal
  
+  hub-api:
+    build:
+      context: .
+      dockerfile: hub-api/Dockerfile
+    container_name: hub-api
+    # ## local dev only
+    # volumes:  
+    #   - ./hub-api/app:/var/www/html/app
+    #   - ./hub-api/config:/var/www/html/config
+    #   - ./hub-api/database:/var/www/html/database
+    #   - ./hub-api/tests:/var/www/html/tests 
+    #   - ./hub-api/vendor:/var/www/html/vendor
+    #   - ./hub-api/routes:/var/www/html/routes
+    depends_on:
+      hub-db:
+        condition: 'service_healthy'
+        restart: true
+    ports:
+      - '8080:80'
+    networks:
+      - internal
+    entrypoint: "/usr/bin/supervisord -c /etc/supervisord.conf"
+ 
   node:
     build:
       context: ./hub-fe 
     container_name: hub-fe
+    # ## local dev only
     # volumes:
     #   - ./hub-fe/src:/app/src
     ports: 
