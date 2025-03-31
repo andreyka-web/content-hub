@@ -3,27 +3,31 @@
 namespace App\Http\Controllers;
  
 use Illuminate\Support\Facades\Auth; 
+use Illuminate\Database\Eloquent\Builder;
 
 class ReadFolderController extends Controller
 {
-    public function index(String $parent = null)
+    public function index(String $parent)
     { 
         $user = Auth::user(); 
          
-        if($parent) {
-            $folders = $user->categories->where('parent_id', $parent)->all();
-            $files = $user->files->where('category_id', $parent)->all();
-        }
-        else {
-            $folders = $user->categories->whereNull('parent_id')->all();
-            $files = $user->files->whereNull('category_id')->all();
-        }
+        $folders = $user->categories()->when($parent, function(Builder $query) use ($parent) {
+            $query->where('parent_id', $parent);
+        }, fn(Builder $query) =>
+            $query->whereNull('parent_id')
+        )->get();
+
+        $files = $user->files()->when($parent, function(Builder $query) use ($parent) {
+            $query->where('category_id', $parent);
+        }, fn(Builder $query) =>
+            $query->whereNull('category_id')
+        )->get(); 
         
-        return [
+        return response()->json([
             'user' => $user->id,
             'parent' => $parent,
             'folders' => $folders,
             'files' => $files
-        ];
+        ]);
     } 
 }
