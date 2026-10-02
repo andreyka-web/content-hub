@@ -8,6 +8,7 @@ use App\Models\Category;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Http\Response;
 
 class CategoryController extends Controller
 {
@@ -27,15 +28,11 @@ class CategoryController extends Controller
      */
     public function store(StoreCategoryRequest $request)
     {
-        if($request->validated()){
+        $category = $request->user()
+            ->categories()
+            ->create($request->validated());
 
-            $data = $request->safe()->all();
-            $category = $request->user()->categories()->create($data);
-
-            return $category;
-        }
-
-        return $request->validator->errors();
+        return response()->json($category, Response::HTTP_CREATED);
     }
 
     /**
@@ -45,7 +42,7 @@ class CategoryController extends Controller
     { 
         Gate::authorize('view', $category); 
  
-        return $category;
+        return response()->json($category, Response::HTTP_OK);
     }
 
     /**
@@ -53,8 +50,8 @@ class CategoryController extends Controller
      */
     public function update(UpdateCategoryRequest $request, Category $category)
     { 
-        $category->update($request->safe()->all());
-        return $category;
+        $category->update($request->validated());
+        return response()->json($category);
     }
 
     /**
@@ -64,7 +61,7 @@ class CategoryController extends Controller
     {
         Gate::authorize('delete', $category);
 
-        $this->purgeCategory($category); 
+        $this->purgeCategory($category);
         
         return ['message' => 'The category was deleted'];
     }
