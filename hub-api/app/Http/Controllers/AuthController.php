@@ -3,22 +3,25 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Actions\Auth\AuthenticateUser;
+use App\Http\Requests\Auth\{LoginRequest,RegisterRequest};
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-    public function register(Request $request)
+    public function register(RegisterRequest $request)
     {
-        $fields = $request->validate([
-            'name' => 'required|max:255',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|confirmed'
+        $data = $request->validated();
+
+        $user = User::create([
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'password' => $data['password']
         ]);
 
-        $user = User::create($fields);
-
         $token = $user->createToken($request->name);
+
+        // TODO: login right away or wait for email confirmation
 
         return [
             'message' => 'User registered successfully.'
@@ -26,27 +29,21 @@ class AuthController extends Controller
     }
 
     
-    public function login(Request $request)
+    public function login(LoginRequest $request, AuthenticateUser $authenticateUser)
     {
-        $request->validate([
-            'email' => 'required|email|exists:users,email',
-            'password' => 'required'
+        $authenticateUser->handle($request);
+
+        $user = auth()->user();
+
+        $token = $user->createToken($user->name)->plainTextToken;
+
+        return response()->json([
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name 
+            ],
+            'token' => $token
         ]);
-
-        $user = User::where('email', $request->email)->first();
-
-        if (!$user || !Hash::check($request->password, $user->password)) {
-            return response([
-                'message' => 'The provided credentials are incorrect'
-            ], 422);
-        }
-
-        $token = $user->createToken($user->name);
-
-        return [
-            'user' => $user,
-            'token' => $token->plainTextToken
-        ];
     }
 
 
