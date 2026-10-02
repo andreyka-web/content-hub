@@ -8,6 +8,7 @@
 .env
 .env.backup
 .env.production
+.env.testing
 .phpactor.json
 .phpunit.result.cache
 Homestead.json
@@ -20,3 +21,4 @@ yarn-error.log
 /.vscode
 /.zed
 /supervisord.log
+/supervisord.pid
