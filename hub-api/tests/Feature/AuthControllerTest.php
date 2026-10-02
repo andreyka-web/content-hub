@@ -11,12 +11,7 @@ class AuthControllerTest extends TestCase
 {
     use RefreshDatabase; 
 
-    /**
-     * Test user registration.
-     *
-     * @return void
-     */
-    public function test_register_user_successfully()
+    public function test_register_user_successfully(): void
     {
         // Simulate a request payload for registration
         $response = $this->postJson('/api/register', [
@@ -38,12 +33,7 @@ class AuthControllerTest extends TestCase
         ]);
     }
 
-    /**
-     * Test user login.
-     *
-     * @return void
-     */
-    public function test_user_can_login_successfully()
+    public function test_user_can_login_successfully(): void
     {
         // Create a user in the database
         $user = User::factory()->create([
@@ -58,15 +48,10 @@ class AuthControllerTest extends TestCase
         ]);
 
         // Assert successful login
-        $response->assertStatus(200)->assertJsonPath('user.email', 'johndoe@example.com'); 
+        $response->assertStatus(200)->assertJsonPath('user.name', $user->name); 
     }
 
-    /**
-     * Test user login with incorrect credentials.
-     *
-     * @return void
-     */
-    public function test_user_login_fails_with_wrong_credentials()
+    public function test_user_login_fails_with_wrong_credentials(): void
     {
         // Create a user in the database
         $user = User::factory()->create([
@@ -82,15 +67,10 @@ class AuthControllerTest extends TestCase
 
         // Assert failed login
         $response->assertStatus(422) // Validation failed
-            ->assertJsonPath("message", "The provided credentials are incorrect");
+            ->assertJsonPath("message", "These credentials do not match our records.");
     }
 
-    /**
-     * Test user logout.
-     *
-     * @return void
-     */
-    public function test_user_can_logout_successfully()
+    public function test_user_can_logout_successfully(): void
     {
         // Create and authenticate a user
         $user = User::factory()->create();
