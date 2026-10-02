@@ -1,4 +1,4 @@
-FROM php:8.3-fpm-alpine
+FROM php:8.5.6-fpm-alpine
 
 RUN apk add --no-cache \
     composer \
@@ -33,12 +33,9 @@ RUN mkdir -p ${COMPOSER_HOME}
 
 # copy app files with and change owner:group
 COPY --chown=www-data:www-data ./hub-api /var/www/html
-COPY --chown=www-data:www-data ./hub-api/.env.example /var/www/html/.env
 
 WORKDIR /var/www/html 
 
-RUN composer install
-RUN php artisan config:clear 
 EXPOSE 9000
 
 # dev only
@@ -48,4 +45,10 @@ EXPOSE 9000
 COPY ./hub-api/.docker/nginx/default.conf /etc/nginx/http.d/default.conf
 
 # the supervisor configuration file
-COPY --chown=www-data:www-data ./hub-api/.docker/supervisord.conf /etc/supervisord.conf  
+COPY ./hub-api/.docker/supervisord.conf /etc/supervisord.conf
+
+# entrypoint: run migrations at startup (when hub-db is available), then launch supervisor
+COPY ./hub-api/.docker/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+CMD ["/entrypoint.sh"]
