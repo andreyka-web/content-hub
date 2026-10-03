@@ -47,3 +47,6 @@ jobs:
     - name: Run Tests
       working-directory: hub-api
       run: php artisan test
+      env:
+          DB_CONNECTION: sqlite
+          DB_DATABASE: ":memory:"
