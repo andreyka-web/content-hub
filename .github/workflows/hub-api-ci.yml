@@ -2,12 +2,11 @@ name: Hub API CI
 
 on:
   push:
-    branches: [ main ]
-    # 🎯 Only trigger when files inside the /api folder change
+    branches: [ "master", "dev" ]
     paths:
       - 'hub-api/**'
   pull_request:
-    branches: [ main ]
+    branches: [ "master", "dev" ]
     paths:
       - 'hub-api/**'
 
