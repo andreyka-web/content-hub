@@ -13,7 +13,7 @@ class CategoryPolicy
      */
     public function viewAny(User $user): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -29,8 +29,12 @@ class CategoryPolicy
     /**
      * Determine whether the user can create models.
      */
-    public function create(User $user): bool
+    public function create(User $user, ?Category $category = null): bool
     {
+        if ($category && $category->user_id !== $user->id) {
+            return false;
+        }
+
         return true;
     }
 
