@@ -44,10 +44,6 @@ jobs:
         mkdir -p database
         touch database/database.sqlite
 
-    - name: Run Migrations
-      working-directory: hub-api
-      run: php artisan migrate --force
-
     - name: Run Tests
       working-directory: hub-api
       run: php artisan test
