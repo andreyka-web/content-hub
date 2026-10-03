@@ -19,6 +19,7 @@ RUN apk add --no-cache \
     php-xml \
     php-dom \
     php-xmlwriter \
+    php-pear \ 
     supervisor
 
 RUN apk add icu-dev
@@ -37,7 +38,10 @@ WORKDIR /var/www/html
 
 EXPOSE 9000
 
-#  Nginx configuration file
+# dev only
+# VOLUME /var/www/html/vendor
+
+# Nginx configuration file
 COPY ./hub-api/.docker/nginx/default.conf /etc/nginx/http.d/default.conf
 
 # the supervisor configuration file

@@ -3,11 +3,30 @@ import Alert from '../ui/Alert.vue';
 import Label from '../ui/Label.vue';
 import Input from '../ui/Input.vue';
 import Button from '../ui/Button.vue';
-
 import { useRouter } from 'vue-router';
+import fetchData from '@/lib/fetchApi'
 
-import fetchData from '@/lib/fetchApi' 
+const { parentFolderId } = defineProps(['parentFolderId']);
+const emits = defineEmits(['category-saved']);
 
+var folder = null;
+var message = null;
+const router = useRouter();
+
+const saveCategory = async () => {
+    console.log(folder, parentFolderId);
+    fetchData('category', { name: folder, parent_id: parentFolderId }, "POST")
+        .then(json => {
+            if (json.hasOwnProperty('message')) {
+                message = json.message
+            }
+            else {
+                folder = null;
+                message = null;
+                emits('category-saved');
+            }
+        });
+};
 </script>
 
 <template>
@@ -17,35 +36,4 @@ import fetchData from '@/lib/fetchApi'
         <Input name="folder" id="folder" v-model="folder" />
         <Button>Create Folder</Button>
     </form>
-</template>
-
-<script>
-export default {
-    name: 'CategoryForm',
-    props: {
-        parentFolderId: null
-    },
-    data() {
-        return {
-            folder: null,
-            message: null,
-            router: useRouter(),
-        }
-    },
-    methods: {
-        async saveCategory() { 
-            fetchData('category', { name: this.folder, parent_id: this.parentFolderId }, "POST")
-            .then(json => { 
-                if(json.hasOwnProperty('message')) {  
-                    this.message = json.message
-                }
-                else {
-                    this.folder = null;
-                    this.message = null;
-                    this.$emit('category-saved'); 
-                }
-            });
-        }, 
-    },   
-}
-</script>
+</template> 

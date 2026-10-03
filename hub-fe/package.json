@@ -12,7 +12,8 @@
   "dependencies": {
     "pinia": "^2.2.4",
     "vue": "^3.4.29",
-    "vue-router": "^4.4.5"
+    "vue-router": "^4.4.5",
+    "zod": "^3.24.1"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.0.5",

@@ -19,9 +19,11 @@ class FilePolicy
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, File $file): bool
+    public function view(User $user, File $file): Response
     {
-        return $user->id === $file->user_id;
+        return $user->id === $file->user_id 
+            ? Response::allow() 
+            : Response::deny('You do not own this file!');
     }
 
     /**
@@ -29,15 +31,17 @@ class FilePolicy
      */
     public function create(User $user): bool
     {
-        return $user->id; 
+        return $user->id > 0;
     }
 
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, File $file): bool
+    public function update(User $user, File $file): Response
     {
-        return $user->id === $file->user_id;
+        return $user->id === $file->user_id 
+            ? Response::allow() 
+            : Response::deny('You do not own this file!');
     }
 
     /**

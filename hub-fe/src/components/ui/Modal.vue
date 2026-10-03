@@ -1,27 +1,26 @@
-<script setup>
-import { ref } from "vue";
+<script setup> 
 import Button from "./Button.vue";
 import closeIcon from "../icons/closeIcon.vue";
  
-const props = defineProps({
+var props = defineProps({
   formId: String,
   isOpen: Boolean
 }) 
 
 const emit = defineEmits(['modal-close'])
-
-const target = ref(null)
  
 const titles = Object.freeze({
   'file': "Upload File",
   'folder': "Create Folder",
   'folderEdit': "Rename Folder",
-  'editFile': "Update File"
-});
+  'editFile': "Update File",
+  'deleteFolder': "Delete Folder",
+  'deleteFile': "Delete File"
+}); 
+ 
 </script>
 
 <template>
-
   <div  
     v-if="isOpen"
     class="overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 flex justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full bg-black bg-opacity-30">
@@ -34,10 +33,9 @@ const titles = Object.freeze({
           </Button>
         </div>
         <div class="p-4 md:p-5 space-y-4">
-          <slot />
+          <slot></slot>
         </div>
       </div>
     </div>
   </div>
-
 </template>

@@ -19,5 +19,6 @@ COPY --chown=www-data:www-data . .
 
 # build app for production with minification 
 RUN npm run build   
+# local-dev
 # CMD ["npm", "run", "dev"]
 CMD [ "http-server", "dist", "-p", "3001" ]

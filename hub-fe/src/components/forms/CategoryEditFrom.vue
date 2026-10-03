@@ -6,6 +6,25 @@ import Button from '../ui/Button.vue';
 
 import fetchData from '@/lib/fetchApi'
 
+const { activeFolder } = defineProps(['activeFolder']);
+const emits = defineEmits(['category-saved']);
+
+var message = null;
+
+async function saveCategory() {
+    const data = {
+        name: activeFolder.name,
+        parent_id: activeFolder.parent_id
+    };
+
+    fetchData(`category/${activeFolder.id}`, data, "PUT")
+        .then(json => { 
+            message = json.hasOwnProperty('message') ? json.message : null;
+            if (message == null) {
+                emits('category-saved');
+            }
+        });
+};
 </script>
 
 <template>
@@ -16,33 +35,3 @@ import fetchData from '@/lib/fetchApi'
         <Button>Rename Folder</Button>
     </form>
 </template>
-
-<script>
-export default {
-    name: 'CategoryEditForm',
-    props: {
-        activeFolder: null
-    },
-    data() {
-        return {
-            message: null,
-        }
-    },
-    methods: {
-        async saveCategory() {
-            const data = {
-                name: this.activeFolder.name,
-                parent_id: this.activeFolder.parent_id
-            };
-
-            fetchData(`category/${this.activeFolder.id}`, data, "PUT")
-                .then(json => {
-                    this.message = json.hasOwnProperty('message') ? json.message : null;
-                    if (this.message == null) {
-                        this.$emit('category-saved');
-                    }
-                });
-        },
-    },
-}
-</script>

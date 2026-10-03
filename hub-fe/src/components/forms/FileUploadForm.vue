@@ -43,10 +43,10 @@ export default {
                 data.append('category', this.parentFolderId)
             }
 
-            const headers = getHeaders()  
+            const headers = getHeaders()   
 
             fetch('http://localhost:8080/api/file', {
-                headers: getHeaders(),
+                headers: headers,
                 body: data,
                 method: "POST",
                 // mode: 'no-cors',
