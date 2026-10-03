@@ -28,9 +28,11 @@ jobs:
       working-directory: hub-api
       run: composer install --prefer-dist --no-interaction
 
-    - name: Create .env.testing
+    - name: Create .env.testing and .env files
       working-directory: hub-api
-      run: cp .env.testing.example .env.testing
+      run: |
+        cp .env.testing.example .env.testing
+        cp .env.example .env
 
     - name: Generate App Key
       working-directory: hub-api
