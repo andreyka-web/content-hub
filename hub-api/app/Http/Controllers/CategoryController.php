@@ -5,21 +5,29 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreCategoryRequest;
 use App\Http\Requests\UpdateCategoryRequest;
 use App\Models\Category;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use App\Actions\PurgeCategory;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Storage;
 
 class CategoryController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $user = Auth::user(); 
+        Gate::authorize('viewAny', Category::class);
+
+        $perPage = request()->get('per_page', 25);
+        $orderBy = request()->get('order_by', 'name');
+        $orderDirection = request()->get('order_direction', 'asc');
         
-        // todo: pagination
-        return $user->categories->all();
+        $categories = $request->user()->categories()
+            ->orderBy($orderBy, $orderDirection)
+            ->paginate($perPage);
+
+        return response()->json($categories, Response::HTTP_OK);
     }
 
     /**
@@ -27,25 +35,21 @@ class CategoryController extends Controller
      */
     public function store(StoreCategoryRequest $request)
     {
-        if($request->validated()){
+        $category = $request->user()
+            ->categories()
+            ->create($request->validated());
 
-            $data = $request->safe()->all();
-            $category = $request->user()->categories()->create($data);
-
-            return $category;
-        }
-
-        return $request->validator->errors();
+        return response()->json($category, Response::HTTP_CREATED);
     }
 
     /**
      * Display the specified resource.
      */
     public function show(Category $category)
-    { 
-        Gate::authorize('view', $category); 
- 
-        return $category;
+    {
+        Gate::authorize('view', $category);
+
+        return response()->json($category, Response::HTTP_OK);
     }
 
     /**
@@ -53,40 +57,20 @@ class CategoryController extends Controller
      */
     public function update(UpdateCategoryRequest $request, Category $category)
     { 
-        $category->update($request->safe()->all());
-        return $category;
+        $category->update($request->validated());
+
+        return response()->json($category, Response::HTTP_OK);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Category $category)
+    public function destroy(Category $category, PurgeCategory $purgeCategory)
     {
         Gate::authorize('delete', $category);
 
-        $this->purgeCategory($category); 
-        
-        return ['message' => 'The category was deleted'];
-    }
-    
-    // recursively delete category and all files it contains
-    private function purgeCategory($category) {
-        $user = Auth::user(); 
-        // delete all files in the category
-        $files = $user->files->where('category_id', $category->id);
-        foreach($files as $file){
-            $file->delete();
-            if (Storage::exists($file->path)) {
-                Storage::delete($file->path);
-            }
-        }
+        $purgeCategory->execute($category);
 
-        $category->delete();
-
-        // get child categories 
-        $categories = $user->categories->where('parent_id', $category->id);
-        foreach($categories as $category){
-            $this->purgeCategory($category);
-        }
+        return response()->json(null, Response::HTTP_NO_CONTENT);
     }
 }
