@@ -1,24 +1,37 @@
-FROM node:18
+### build app
 
-# install simple http server for serving static content
-RUN npm install -g http-server
-
-# make the 'app' folder the current working directory
-RUN mkdir /app && chown www-data:www-data /app
+FROM node:22-slim AS builder
 
 WORKDIR /app
 
-# copy 'package.json' to install dependencies
-COPY package*.json /app
- 
-# install dependencies
-RUN npm install
+COPY package*.json ./
 
-# copy files and folders to the current working directory (i.e. 'app' folder)
-COPY --chown=www-data:www-data . .
+# RUN npm ci --legacy-peer-deps
+RUN yarn install --frozen-lockfile
 
-# build app for production with minification 
-RUN npm run build   
-# local-dev
-# CMD ["npm", "run", "dev"]
+COPY . .
+
+RUN yarn build
+
+### serve app
+
+FROM alpine:3.20
+
+# Install http-server globally using a lightweight Node/NPM setup
+RUN apk add --no-cache nodejs npm && \
+    npm install -g http-server && \
+    mkdir /app && \
+    addgroup -S appgroup && adduser -S appuser -G appgroup && \
+    chown appuser:appgroup /app
+
+WORKDIR /app
+
+# Copy ONLY the compiled static files from the builder stage
+COPY --from=builder --chown=appuser:appgroup /app/dist ./dist
+
+# Switch to the non-root user for security
+USER appuser
+
+EXPOSE 3001
+
 CMD [ "http-server", "dist", "-p", "3001" ]
